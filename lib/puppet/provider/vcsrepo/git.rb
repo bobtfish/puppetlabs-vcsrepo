@@ -289,10 +289,12 @@ Puppet::Type.type(:vcsrepo).provide(:git, parent: Puppet::Provider::Vcsrepo) do
 
   def mirror?
     at_path do
-      git_with_identity('config', '--get-regexp', 'remote\..*\.mirror')
-      return true
-    rescue Puppet::ExecutionFailure
-      return false
+      begin
+        git_with_identity('config', '--get-regexp', 'remote\..*\.mirror')
+        return true
+      rescue Puppet::ExecutionFailure
+        return false
+      end
     end
   end
 
@@ -318,9 +320,11 @@ Puppet::Type.type(:vcsrepo).provide(:git, parent: Puppet::Provider::Vcsrepo) do
         end
       else
         @resource.value(:source).each_key do |remote|
-          exec_git('config', '--unset', "remote.#{remote}.mirror")
-        rescue Puppet::ExecutionFailure
-          next
+          begin
+            exec_git('config', '--unset', "remote.#{remote}.mirror")
+          rescue Puppet::ExecutionFailure
+            next
+          end
         end
       end
     end
